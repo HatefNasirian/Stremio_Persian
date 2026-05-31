@@ -5,7 +5,10 @@ from scraper import parse_archive, find_movie_block, extract_streams
 app = FastAPI()
 
 ARCHIVE_URL = "One_Page_Archive.html"
+with open(ARCHIVE_URL, "r", encoding="utf-8") as f:
+    html = f.read()
 
+print("ARCHIVE_URL has loaded")
 
 @app.get("/manifest.json")
 def manifest():
@@ -28,8 +31,6 @@ def manifest():
 
 @app.get("/catalog/movie/onemovies_movies.json")
 def catalog():
-    with open("archive.html", "r", encoding="utf-8") as f:
-        html = f.read()
     items = parse_archive(html)
 
     return {"metas": items}
@@ -37,7 +38,6 @@ def catalog():
 
 @app.get("/meta/movie/{imdb_id}.json")
 def meta(imdb_id: str):
-    html = requests.get(ARCHIVE_URL, timeout=20).text
     movie = find_movie_block(html, imdb_id)
 
     if not movie:
@@ -56,7 +56,6 @@ def meta(imdb_id: str):
 
 @app.get("/stream/movie/{imdb_id}.json")
 def stream(imdb_id: str):
-    html = requests.get(ARCHIVE_URL, timeout=20).text
     streams = extract_streams(html, imdb_id)
 
     return {"streams": streams}
